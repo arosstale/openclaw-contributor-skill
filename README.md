@@ -2,7 +2,8 @@
 
 Automated issue analysis → root cause fix → comprehensive testing → PR submission workflow for OpenClaw contributors.
 
-Inspired by [tyler6204's maintainer-skill](https://github.com/tyler6204/openclaw-maintainer-skill), adapted for contributors following [Mario Zechner's philosophy](https://twitter.com/mariozechner): **deep understanding > volume, quality > speed, iterate on feedback**.
+Inspired by [tyler6204's maintainer-skill](https://github.com/tyler6204/openclaw-maintainer-skill), adapted for contributors following 
+[Mario Zechner's philosophy](https://twitter.com/mariozechner): **deep understanding > volume, quality > speed, iterate on feedback**.
 
 ## Quick Start
 
