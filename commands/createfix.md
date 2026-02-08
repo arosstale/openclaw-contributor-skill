@@ -1,105 +1,84 @@
-# Create Fix Command
+# Create Fix
 
-## Task
-Implement the fix for the issue analyzed. Write tests. Verify locally. Push to branch.
-
-## Pre-Fix Checklist
-- [ ] Issue analysis completed
-- [ ] Root cause identified
-- [ ] Solution approach approved
-- [ ] Working on fresh branch
+## Prerequisites
+- Issue analyzed (root cause identified)
+- No existing PRs for this issue (verified)
+- User approved the proposed fix
 
 ## Steps
 
-1. **Create Branch**
-   ```bash
-   git checkout -b fix/ISSUE_NUMBER-description main
-   ```
+### 1. Sync Fork
+```bash
+cd /tmp/openclaw-fork
+git checkout main
+git pull origin main
+```
 
-2. **Implement Fix**
-   - Make changes to identified files
-   - Follow defensive programming patterns
-   - Add comments for non-obvious logic
-   - Keep changes focused (single responsibility)
+### 2. Create Branch
+```bash
+git checkout -b fix/ISSUE_NUMBER-brief-description
+```
 
-3. **Write Tests**
-   - Minimum 3 test cases required
-   - Test the fix directly
-   - Test edge cases
-   - Test defensive patterns
-   - Follow existing test patterns in repo
+### 3. Implement the Fix
+- Make the minimal change that fixes the root cause
+- Follow patterns from surrounding code
+- Check data formats match what callers expect
+- Handle edge cases
 
-4. **Local Verification**
-   ```bash
-   npm run build    # Must pass
-   npm test         # All tests must pass
-   ```
-   - If build fails: fix and retest
-   - If tests fail: review test logic or fix
-   - Do NOT proceed to submission if either fails
+### 4. Verify It Compiles (MANDATORY)
+```bash
+npm run build
+```
+**If this fails, fix it. Do NOT proceed with broken code.**
 
-5. **Professional Commit**
-   ```bash
-   git add [changed files]
-   git commit -m "fix: Brief description (#ISSUE_NUMBER)
+### 5. Run Tests (MANDATORY)
+```bash
+npm test
+```
+**If tests fail, fix them. Do NOT proceed with failing tests.**
 
-   ## Problem
-   [User-facing symptom]
+### 6. Review Your Own Diff
+```bash
+git diff
+```
+Check for:
+- Stray debug lines or copy-paste artifacts
+- Broken template literals (literal newlines inside backtick strings)
+- Wrong content format (string vs [{type, text}] array)
+- Wrong key format (plain ID vs provider/model prefixed)
+- Non-exported imports
+- Logic that changes existing behavior unintentionally
 
-   ## Root Cause
-   [Technical explanation with file:line references]
+These were all real bugs in our past PRs.
 
-   ## Solution
-   [What was changed and why]
+### 7. Commit
+```bash
+git add <specific files only>
+git commit -m "fix(scope): brief description
 
-   ## Testing
-   - ✅ Local build passes
-   - ✅ All tests pass
-   - ✅ 3+ test cases added
+Fixes #ISSUE_NUMBER
 
-   Fixes #ISSUE_NUMBER"
-   ```
+Root cause: [one sentence]
+Fix: [one sentence]"
+```
 
-6. **Push to Fork**
-   ```bash
-   git push -u origin fix/ISSUE_NUMBER-description
-   
-   # Verify push succeeded
-   git rev-parse HEAD  # Local SHA
-   git rev-parse origin/fix/ISSUE_NUMBER-description  # Remote SHA
-   # Must match
-   ```
+### 8. Push
+```bash
+git push fork fix/ISSUE_NUMBER-brief-description
+```
 
-7. **Report Status**
-   ```
-   ✅ Branch: fix/ISSUE_NUMBER-description
-   ✅ Local build: PASS
-   ✅ Tests: PASS (15 passing)
-   ✅ Commits: 1
-   ✅ Pushed to GitHub
-   
-   Ready to submit? YES / NEEDS CHANGES
-   ```
+### 9. Report
+```
+Branch: fix/ISSUE_NUMBER-brief-description
+Build: PASS / FAIL
+Tests: PASS / FAIL
+Files changed: [list]
+Ready to submit: YES / NO
+```
 
-## Quality Gates (MUST PASS)
-- [ ] Local `npm run build` passes
-- [ ] Local `npm test` passes (100% pass rate)
-- [ ] 3+ test cases written
-- [ ] Defensive patterns used
-- [ ] No band-aids or workarounds
-- [ ] Professional commit message
-- [ ] Branch pushed to origin
-
-## Safety Rules
-- NEVER force push to main
-- NEVER push to main directly
-- NEVER commit without tests passing locally
-- Only push to fix/* branches
-- Verify push landed on GitHub (SHA match)
-
-## Success Criteria
-- All quality gates pass
-- Tests pass locally
-- Branch pushed to fork
-- Status report provided
-- Ready for PR submission
+## Rules
+- npm run build MUST pass before committing
+- npm test MUST pass before committing
+- Review your own diff for common mistakes
+- One commit per fix
+- Push to fork remote only

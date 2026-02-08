@@ -1,31 +1,8 @@
 # OpenClaw Contributor Skill Configuration
 
-models:
-  analyze: opus           # Claude Opus for deep code analysis
-  fix: gpt                # GPT with thinking for implementations
-  submit: gpt             # GPT with thinking for PR creation
-
-thinking:
-  fix: high              # Deep methodical implementation
-  submit: high           # Careful PR creation
-
-quality_gates:
-  min_test_cases: 3
-  require_build_pass: true
-  require_tests_pass: true
-  defensive_patterns: true
-
-# Sustainable pace target
-target_fix_time_minutes: 25
-
-# Repositories
 target_repo: openclaw/openclaw
 fork_repo: arosstale/openclaw
+fork_remote: fork
 
-# Skill philosophy
-philosophy: |
-  Deep understanding before shipping
-  Quality over volume
-  Iterate based on feedback
-  Sustainable pace
-  Professional communication
+# The only rule that matters
+check_duplicates_first: true

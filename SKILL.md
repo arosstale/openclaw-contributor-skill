@@ -1,115 +1,155 @@
 ---
 name: openclaw-contributor
-description: PR creation and contribution automation for OpenClaw contributors. Analyze issues, create fixes, write tests, and submit PRs. Use when asked to fix an issue or create a PR.
+description: Contribute to OpenClaw responsibly. One issue at a time. Check for duplicates first. Verify code compiles. Never add to the PR flood.
 ---
 
-# OpenClaw Contributor
+# OpenClaw Contributor Skill
 
-Automated issue analysis → root cause fix → comprehensive testing → PR submission workflow.
+## HARD-WON RULES (from closing 38 of our own 40 PRs)
 
-## SAFETY: QUALITY GATES FIRST
+1. **CHECK FOR EXISTING PRs FIRST** — Before touching any code, search for PRs already targeting the same issue. If someone else submitted first, do not duplicate their work.
+2. **ONE PR AT A TIME** — Finish one completely before starting the next. No batching. No spray-and-pray.
+3. **VERIFY IT COMPILES** — Run `npm run build` locally. If it fails, do not submit.
+4. **READ EVERY REVIEW COMMENT** — Address Greptile and maintainer feedback before moving on.
+5. **CLOSE YOUR OWN BROKEN PRs** — If a PR has quality issues or is a duplicate, close it immediately with an honest comment.
 
-This skill ensures production-ready PRs only:
-- NEVER submit without local build passing
-- NEVER submit without all tests passing
-- NEVER submit without root cause analysis
-- NEVER submit without defensive programming patterns
-- All PRs must have 3+ test cases minimum
-- All PRs must include professional descriptions
+## Why These Rules Exist
 
-## Command Files
+We learned this the hard way. See [discussion #11907](https://github.com/openclaw/openclaw/discussions/11907#discussioncomment-15736421):
 
-The actual command files live in this skill's `commands/` folder:
-- `commands/analyzeissue.md` - deep issue analysis + root cause
-- `commands/createfix.md` - implement fix + write tests
-- `commands/submitpr.md` - create PR + verify submission
+> *"The majority of PRs are trash, and I have the impression people are telling their bots 'find ten random issues and post PRs for them' with zero oversight... PRs came in faster than I could read them."* — HenryLoenwind
 
-## Workflow Overview (3 step)
+We were part of that problem. These rules ensure we never are again.
 
-1. **User:** "fix issue #10238"
-2. **Main agent:** spawns subagent via `sessions_spawn`. Subagent reads `commands/analyzeissue.md` and executes.
-3. **Analysis subagent:** digs into issue, identifies root cause, proposes solution
-4. **Main agent:** summarizes findings for user (ready to fix, needs more info, too complex)
-5. **User:** "ok fix it" / "research more" / "skip this one"
-6. **Main agent:** if approved, spawns subagent (high thinking) via `sessions_spawn`. Subagent reads `commands/createfix.md`.
-7. **Fix subagent:** implements fix, writes tests (3+ cases), runs local build, runs tests, commits with professional message, pushes to new branch, verifies push landed
-8. **User:** "submit it" / "needs changes" / "abandon"
-9. **Main agent:** if ready, spawns subagent (high thinking) via `sessions_spawn`. Subagent reads `commands/submitpr.md`.
-10. **Submit subagent:** creates PR via gh cli, adds professional description, verifies submission on GitHub
-11. **Main agent:** confirms to user with PR URL
+## Workflow
 
-## ⚠️ ALWAYS USE SUBAGENT
+### Step 1: Pick ONE Issue
 
-Analysis, fixing, and submission are complex tasks. NEVER run in the main thread. Always use `sessions_spawn` to create a subagent.
+```bash
+gh issue list --repo openclaw/openclaw --state open --limit 20
+```
 
-## Model Preferences
+Pick one issue. Read it completely. Understand the user's actual problem.
 
-Preferred models (fall back to session default if not available):
-- Analysis: `model:opus` (best for deep code understanding)
-- Fix: `model:gpt` with `thinking:high` (methodical implementations + tests)
-- Submit: `model:gpt` with `thinking:high` (professional PR creation)
+### Step 2: Check for Existing PRs (MANDATORY)
 
-## Config (optional)
+```bash
+# Search by issue number
+gh search prs --repo openclaw/openclaw --state open "ISSUE_NUMBER"
 
-Create `config.yaml` in this skill folder to override defaults:
+# Search by keywords from the issue title
+gh search prs --repo openclaw/openclaw --state open "relevant keywords"
+
+# Check if anyone linked a PR in the issue comments
+gh issue view ISSUE_NUMBER --repo openclaw/openclaw --json comments
+```
+
+**If an existing PR addresses this issue: STOP. Do not create a duplicate.**
+
+### Step 3: Analyze the Code
+
+- Read the relevant source files
+- Trace the code path from symptom to root cause
+- Identify the exact file and line where the bug occurs
+- Understand WHY the current code is wrong
+
+Do NOT start coding until you can explain the root cause clearly.
+
+### Step 4: Implement the Fix
+
+```bash
+cd /tmp/openclaw-fork
+git checkout main && git pull origin main
+git checkout -b fix/ISSUE_NUMBER-brief-description
+```
+
+- Make the minimal change that fixes the root cause
+- Follow existing code patterns in the file
+- Handle edge cases (check how similar code handles them nearby)
+
+### Step 5: Verify Locally (MANDATORY)
+
+```bash
+npm run build   # MUST pass — no exceptions
+npm test        # MUST pass — no exceptions
+```
+
+If either fails, fix the issue. Do NOT submit broken code.
+
+### Step 6: Check Content Format
+
+Before committing, verify your changes handle data structures correctly:
+- Are messages `{content: string}` or `{content: [{type: "text", text: "..."}]}`? Check surrounding code.
+- Are model IDs `"claude-sonnet-4"` or `"anthropic/claude-sonnet-4"`? Check callers.
+- Does the config use `models.providers.*` or flat keys? Check existing patterns.
+
+These content format mismatches were the #1 source of bugs in our PRs.
+
+### Step 7: Commit and Push
+
+```bash
+git add <specific files>
+git commit -m "fix(scope): brief description
+
+Fixes #ISSUE_NUMBER
+
+Root cause: [one sentence explaining why the bug happened]
+Fix: [one sentence explaining what the change does]"
+
+git push fork fix/ISSUE_NUMBER-brief-description
+```
+
+### Step 8: Create PR
+
+```bash
+gh pr create \
+  --repo openclaw/openclaw \
+  --head arosstale:fix/ISSUE_NUMBER-brief-description \
+  --base main \
+  --title "fix(scope): brief description" \
+  --body "Fixes #ISSUE_NUMBER
+
+[2-3 sentences: what was broken, why, what this changes]"
+```
+
+Keep the description short and honest. No padding.
+
+### Step 9: Monitor and Respond
+
+```bash
+# Check for reviews
+gh pr view PR_NUMBER --repo openclaw/openclaw --json reviews,comments
+
+# Check Greptile inline comments
+gh api repos/openclaw/openclaw/pulls/PR_NUMBER/comments --jq '.[].body'
+```
+
+If Greptile or a maintainer flags an issue:
+1. Read the feedback carefully
+2. Fix it in a follow-up commit
+3. Push to the same branch
+4. If the fix is too broken, close the PR honestly
+
+### Step 10: Only Then Start the Next One
+
+Do not batch. Do not pipeline. Finish one PR completely — including responding to all review feedback — before starting the next.
+
+## Anti-Patterns (things we actually did wrong)
+
+| What we did | What we should have done |
+|---|---|
+| Created 10 PRs in one session | Created 1, verified it, then the next |
+| Never checked existing PRs | Searched first, found 5 duplicates |
+| Shipped broken template literals | Ran `npm run build` before submitting |
+| Wrong content format (string vs array) | Checked how surrounding code handles it |
+| Wrong model ID key format | Checked what callers pass to the function |
+| 10 test-coverage PRs with no linked issue | Only PRs that fix user-reported problems |
+| Optimized for "PRs created" count | Optimized for "problems actually solved" |
+
+## Config
 
 ```yaml
-# ~/openclaw/skills/openclaw-contributor/config.yaml
-models:
-  analyze: opus         # or anthropic/claude-opus-4-5
-  fix: gpt              # or openai-codex/gpt-5.2
-  submit: gpt           # or openai-codex/gpt-5.2
-  fix_thinking: high
-  submit_thinking: high
-
-quality_gates:
-  min_test_cases: 3
-  require_build_pass: true
-  require_tests_pass: true
-  defensive_patterns: true
+target_repo: openclaw/openclaw
+fork_repo: arosstale/openclaw
+fork_remote: fork
 ```
-
-If config not present or model not available, uses session default model.
-
-## Analysis Workflow (/analyzeissue)
-
-Spawn a subagent with a task referencing the command file:
-
-```
-sessions_spawn task:"Analyze issue #<number> in openclaw repo. Read commands/analyzeissue.md and follow its instructions exactly." model:opus runTimeoutSeconds:0 (infinite)
-```
-
-## Fix Workflow (/createfix)
-
-Spawn a subagent for fix implementation (only after user approves analysis):
-
-```
-sessions_spawn task:"Create fix for issue #<number> in openclaw repo. Read commands/createfix.md and follow its instructions exactly." model:gpt thinking:high runTimeoutSeconds:0 (infinite)
-```
-
-## Submit Workflow (/submitpr)
-
-Spawn a subagent for PR submission (only after fix is complete and user says submit):
-
-```
-sessions_spawn task:"Submit PR for issue #<number> in openclaw repo. Read commands/submitpr.md and follow its instructions exactly." model:gpt thinking:high runTimeoutSeconds:0 (infinite)
-```
-
-## Key Principles
-
-- **Deep Understanding First**: Always analyze root cause before coding
-- **Defensive Programming**: Assume the worst, code for safety
-- **Comprehensive Testing**: 3+ test cases minimum per fix
-- **Professional Communication**: Clear PRs, thorough descriptions
-- **Quality Gates**: Build must pass, tests must pass
-- **Single Responsibility**: Each fix addresses one root cause
-- **Sustainable Pace**: 25 min per fix is the target
-
-## Important Notes
-
-- Subagents read the command file directly, they do NOT read this SKILL.md
-- Each command file is self-contained with all setup, steps, and quality gates
-- If build fails, report failure and suggest debugging steps
-- If tests fail, report and do NOT submit
-- PR submission is the final step only
-- Quality > Volume: One good PR beats 10 rushed ones

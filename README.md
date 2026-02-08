@@ -1,169 +1,50 @@
 # OpenClaw Contributor Skill
 
-Automated issue analysis → root cause fix → comprehensive testing → PR submission workflow for OpenClaw contributors.
+A Pi skill for contributing to [OpenClaw](https://github.com/openclaw/openclaw) responsibly.
 
-Inspired by [tyler6204's maintainer-skill](https://github.com/tyler6204/openclaw-maintainer-skill), adapted for contributors following 
-[Mario Zechner's philosophy](https://twitter.com/mariozechner): **deep understanding > volume, quality > speed, iterate on feedback**.
+## What This Skill Does
 
-## Quick Start
+Guides you through fixing ONE issue at a time:
 
-```bash
-# 1. Analyze an issue
-/analyzeissue #10238
+1. **Check for duplicates** - Search existing PRs before writing any code
+2. **Analyze the issue** - Find the root cause, not just the symptom
+3. **Implement the fix** - Minimal change, verify it compiles and tests pass
+4. **Submit the PR** - Short description, honest about what it does
+5. **Respond to feedback** - Fix Greptile/maintainer comments or close the PR
 
-# 2. Create the fix (after approval)
-/createfix
+## Why It Exists
 
-# 3. Submit the PR (after testing)
-/submitpr
+We created ~40 PRs across several sessions. Then we audited them honestly:
+
+- **38 were closed** - duplicates, broken code, or noise
+- **5 of 10 recent PRs** duplicated work by other contributors
+- **Greptile flagged real bugs** in almost every PR (wrong formats, broken templates, non-exported imports)
+- **2 survived** - the ones where we actually understood the code
+
+This skill encodes the lessons from that experience.
+
+## Hard Rules
+
+1. **Check for existing PRs FIRST** - before any code
+2. **ONE PR at a time** - finish before starting next
+3. **`npm run build` MUST pass** - no exceptions
+4. **Read every review comment** - fix or close
+5. **Close your own broken PRs** - do not leave trash in the queue
+
+## Files
+
+```
+SKILL.md                    - Skill definition and complete workflow
+AGENTS.md                   - Rules for AI agents using this skill
+commands/
+  checkduplicates.md        - How to check for existing PRs (MOST IMPORTANT)
+  analyzeissue.md           - How to analyze an issue
+  createfix.md              - How to implement and verify a fix
+  submitpr.md               - How to submit a PR
+  closebadpr.md             - How to close your own broken PRs
+config.yaml                 - Repository configuration
 ```
 
-## Workflow
+## Context
 
-### Phase 1: Analyze
-- Deep dive into issue
-- Identify root cause (not surface symptoms)
-- Propose defensive solution
-- Estimate effort and risk
-
-### Phase 2: Fix
-- Implement solution
-- Write 3+ test cases
-- Run local build & tests
-- Commit with professional message
-- Push to branch
-
-### Phase 3: Submit
-- Create PR with professional description
-- Reference issue
-- Include testing notes
-- Submit to openclaw/openclaw
-
-## Philosophy
-
-This skill is built on proven principles:
-
-✅ **Deep Understanding First**
-- Don't code until you understand the root cause
-- Trace through the entire code path
-- Document findings clearly
-
-✅ **Defensive Programming**
-- Handle edge cases
-- Add safety checks
-- Use patterns from existing code
-
-✅ **Comprehensive Testing**
-- Minimum 3 test cases per fix
-- Test normal case, edge cases, error cases
-- Verify with local build + tests before submitting
-
-✅ **Quality Gates**
-- Build MUST pass locally
-- Tests MUST pass locally
-- No force pushes to main
-- All PRs go through code review
-
-✅ **Professional Communication**
-- Clear commit messages
-- Thorough PR descriptions
-- Reference original issue
-- Show testing evidence
-
-✅ **Sustainable Pace**
-- Target: 25 minutes per fix
-- No rushing, no burnout
-- Quality over volume
-- Iterate based on feedback
-
-## Key Features
-
-### Automatic Analysis
-- Fetches GitHub issue details
-- Traces root cause in code
-- Proposes solution approach
-- Estimates difficulty
-
-### Intelligent Fix Creation
-- Implements defensive patterns
-- Writes comprehensive tests
-- Verifies local build passes
-- Verifies all tests pass
-- Creates professional commits
-
-### Professional PR Submission
-- Generates professional titles
-- Writes detailed descriptions
-- References original issue
-- Includes testing evidence
-- Submits via GitHub CLI
-
-### Safety Guarantees
-- NEVER force-pushes to main
-- NEVER commits without tests
-- NEVER submits without build passing
-- All fixes pushed to branches only
-- Code reaches main only via PR merge
-
-## Configuration
-
-Edit `config.yaml` to customize:
-
-```yaml
-models:
-  analyze: opus           # Model for issue analysis
-  fix: gpt                # Model for implementation
-  submit: gpt             # Model for PR creation
-
-quality_gates:
-  min_test_cases: 3       # Minimum test cases required
-  require_build_pass: true
-  require_tests_pass: true
-  defensive_patterns: true
-```
-
-## Intended Use
-
-Perfect for:
-- ✅ Fixing real bugs systematically
-- ✅ Learning codebase deeply
-- ✅ Building contributor reputation
-- ✅ Establishing merge rate credibility
-- ✅ Contributing to large projects sustainably
-
-Not intended for:
-- ❌ Spamming low-quality PRs
-- ❌ Theater/volume metrics
-- ❌ Skipping analysis or testing
-- ❌ Surface-level fixes
-
-## Results
-
-Following this skill's workflow, expect:
-
-Week 1: 5-8 merged PRs (establishing credibility)
-Week 2: 10-13 total merged (momentum compounds)
-Week 3: 20-25 total merged (pattern clear)
-Week 4: 35-50 total merged (core contributor)
-
-Success: 50+ merged PRs with 70%+ acceptance rate
-
-## Inspiration
-
-Built on principles from:
-- Mario Zechner's shipping philosophy
-- Tyler's maintainer-skill workflow
-- OpenClaw's quality culture
-- Real contributor experience
-
-## License
-
-Same as OpenClaw (Apache 2.0)
-
-## Support
-
-Issues and PRs to this skill repo:
-https://github.com/arosstale/openclaw-contributor-skill
-
-Original maintainer-skill:
-https://github.com/tyler6204/openclaw-maintainer-skill
+See [OpenClaw discussion #11907](https://github.com/openclaw/openclaw/discussions/11907#discussioncomment-15736421) for why PR hygiene matters.

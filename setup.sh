@@ -1,30 +1,14 @@
 #!/bin/bash
+# Verify prerequisites for OpenClaw contribution
 
-# OpenClaw Contributor Skill Setup
+set -e
 
-echo "Setting up openclaw-contributor-skill..."
+echo "Checking prerequisites..."
 
-# Verify required tools
-command -v gh >/dev/null 2>&1 || { echo "❌ gh CLI not found. Install from https://cli.github.com"; exit 1; }
-command -v git >/dev/null 2>&1 || { echo "❌ git not found"; exit 1; }
+command -v gh >/dev/null 2>&1 || { echo "FAIL: gh CLI not found"; exit 1; }
+command -v git >/dev/null 2>&1 || { echo "FAIL: git not found"; exit 1; }
+gh auth status > /dev/null 2>&1 || { echo "FAIL: GitHub auth not configured"; exit 1; }
+gh repo view arosstale/openclaw > /dev/null 2>&1 || { echo "FAIL: Fork not accessible"; exit 1; }
+gh repo view openclaw/openclaw > /dev/null 2>&1 || { echo "FAIL: openclaw/openclaw not accessible"; exit 1; }
 
-# Check GitHub auth
-gh auth status > /dev/null 2>&1 || { echo "❌ GitHub auth not configured. Run: gh auth login"; exit 1; }
-
-# Verify fork access
-echo "✓ Checking fork access..."
-gh repo view arosstale/openclaw > /dev/null 2>&1 || { echo "❌ Fork not accessible"; exit 1; }
-
-# Verify upstream access
-echo "✓ Checking upstream access..."
-gh repo view openclaw/openclaw > /dev/null 2>&1 || { echo "❌ openclaw/openclaw not accessible"; exit 1; }
-
-echo ""
-echo "✅ Setup complete!"
-echo ""
-echo "Ready to use:"
-echo "  /analyzeissue #ISSUE_NUMBER"
-echo "  /createfix"
-echo "  /submitpr"
-echo ""
-echo "See SKILL.md for full documentation"
+echo "OK. Read SKILL.md for the workflow."
