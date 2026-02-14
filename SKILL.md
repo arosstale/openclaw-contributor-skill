@@ -1,85 +1,83 @@
 ---
 name: openclaw-contributor
-description: Contribute to OpenClaw responsibly. One issue at a time. Check for duplicates first. Verify code compiles. Never add to the PR flood.
+description: Contribute bug fixes to openclaw/openclaw. Checks duplicates, formats with oxfmt, submits PRs with required template. Use when fixing OpenClaw issues.
 ---
 
-# OpenClaw Contributor Skill
+# OpenClaw Contributor
 
-## HARD-WON RULES (9 merged, 38 closed — learned the hard way)
+Bug fix pipeline for openclaw/openclaw. Fork at `arosstale/openclaw`, cloned to `/tmp/openclaw-fork`. Remotes: `origin` = upstream, `fork` = ours.
 
-1. **CHECK FOR EXISTING PRs FIRST** — Before touching any code, run `commands/checkdupe.md`. If someone submitted first, STOP.
-2. **ONE PR AT A TIME** — Finish one completely (including review feedback) before starting the next. Exception: batch-rebase for LIFO freshness is maintenance, not new work.
-3. **FORMAT & LINT** — Run `pnpm exec oxfmt --write <files>` then `pnpm lint`. Never submit unformatted code.
-4. **READ EVERY REVIEW COMMENT** — Address Greptile and maintainer feedback immediately. Greptile often finds real pattern bugs — expand your fix.
-5. **CLOSE YOUR OWN BROKEN PRs** — If a PR has quality issues or is a duplicate, close it immediately with an honest comment.
-6. **PR BODY REQUIREMENTS** — `lobster-biscuit` code word, `Fixes #NNNN`, Summary/Root Cause/Behavior Changes/Tests/Sign-Off sections.
-7. **RESPOND TO ALL GREPTILE COMMENTS** — Reply inline. Search the module for the same pattern — the bug usually exists in more code paths than initially fixed.
-8. **POST-SESSION AUDIT** — After each session, run `commands/audit.md` on ALL open PRs.
-9. **15-PR HARD LIMIT** — Never exceed 15 open PRs. Track available slots.
-10. **SKIP COMPLEX ISSUES** — External deps, macOS-only, deep lifecycle bugs, and issues with competitors are not worth the risk. See `commands/triage.md`.
+## Rules
 
-## Commands
+- **Check duplicates first**: `./scripts/checkdupe.sh ISSUE`. If exit 1, stop.
+- **Stabilisation mode**: bug fixes only. No features, no refactors, no observability.
+- **Format**: `pnpm exec oxfmt --write <files>` then `pnpm lint`.
+- **PR body must include**: `lobster-biscuit`, `Fixes #NNNN`, Summary, Root Cause, Behavior Changes, Sign-Off.
+- **Max 15 open PRs**. Check slots: `gh pr list --repo openclaw/openclaw --author arosstale --state open --json number --jq 'length'`
+- **Respond to Greptile immediately**. Search the module for the same pattern — fix ALL instances, not just the one flagged.
+- **Post-session audit**: `./scripts/audit.sh`
 
-All command files live in `commands/`. Each is self-contained:
+## Workflow
 
-| Command | When to use |
-|---|---|
-| `checkdupe.md` | **ALWAYS FIRST** — before any work on any issue |
-| `triage.md` | Evaluate if an issue is worth fixing |
-| `analyze.md` | Deep root cause analysis after triage passes |
-| `fix.md` | Implement and verify the fix |
-| `submit.md` | Create the PR with proper template |
-| `audit.md` | Post-session health check on ALL open PRs |
-| `rebase.md` | Freshen PRs before merge windows (LIFO strategy) |
-| `close.md` | Close broken/duplicate PRs honestly |
+1. **Triage**: Read the issue. Skip if: external dep, macOS-only, deep lifecycle, >5 files, vague report, has competitor, recent maintainer commit in same area.
+2. **Dupe check**: `./scripts/checkdupe.sh ISSUE_NUMBER`
+3. **Analyze**: Find root cause. Find the reference implementation (canonical pattern). Search module for ALL buggy instances.
+4. **Fix**:
+   ```bash
+   cd /tmp/openclaw-fork
+   git fetch origin main
+   git checkout -b fix/ISSUE-slug origin/main
+   # implement minimal fix, match reference implementation
+   pnpm exec oxfmt --write <files>
+   pnpm lint
+   git add <files>
+   git commit -m "fix(scope): description
 
-## Merge Strategy: LIFO + Author Batching
+   Fixes #ISSUE"
+   git push fork fix/ISSUE-slug
+   ```
+5. **Submit**: Final dupe check, then `gh pr create` with required body (see template below).
+6. **Monitor**: Check Greptile within 5 min. Expand fix if pattern found. Amend + force-push.
 
-**Validated with 9 merges (Feb 2026):**
+## PR Body Template
 
-1. **LIFO**: Maintainers review most recently updated PRs first. Rebase before merge windows.
-2. **Author Batching**: Takhoffman batch-merged 6 of our PRs in 36 minutes. Get one noticed -> cascade.
-3. **Silent Merges = Trust**: All 6 batch-merged PRs had zero review comments.
-4. **Merge Windows**: Takhoffman ~00:30-02:15 UTC. steipete ~14:00-23:00 UTC (peak 17-19).
-5. **Stale Timer**: 5 days -> stale label. 3 more days -> auto-close.
-
-## Stabilisation Mode
-
-OpenClaw is in **STABILISATION MODE** — bug fixes only. No features, no refactors, no observability. cpojer closed an observability PR instantly while merging a performance fix in the same session.
-
-## Issue Skip Criteria
-
-Skip issues that match ANY of these:
-- **External dependency** — bug is in pi-ai SDK, grammY, a provider API, etc.
-- **macOS/iOS only** — we cannot test it
-- **Deep lifecycle** — session management, multi-agent orchestration, compaction
-- **Has competitor** — someone already submitted or commented with intent to fix
-- **Vague report** — "it crashes" with no reproduction steps
-- **Recent maintainer commit** — the area is actively being changed
-
-## Anti-Patterns (real mistakes we made)
-
-| What we did | What we should have done |
-|---|---|
-| Created 10 PRs in one session | Created 1, verified it, then the next |
-| Never checked existing PRs | Searched first, found 5 duplicates |
-| Used `npm run build` | Used `pnpm lint` + `pnpm exec oxfmt` |
-| Fixed 3 of 4 code paths | Searched module for ALL instances of the pattern |
-| Left Greptile comment unresponded | Replied inline within minutes |
-| PR without linked issue | Always include `Fixes #NNNN` |
-| PR without lobster-biscuit | Required by maintainers — PR ignored without it |
-| Used `console.log()` in CLI tool | Used `process.stdout.write()` (bypasses captured handlers) |
-| Wrong content format (string vs array) | Checked how surrounding code handles it |
-| Config without defaults fallback | Found reference implementation (provider.ts) and matched it |
-
-## Config
-
-```yaml
-target_repo: openclaw/openclaw
-fork_repo: arosstale/openclaw
-fork_remote: fork
-work_dir: /tmp/openclaw-fork
-format_tool: oxfmt  # via pnpm exec oxfmt --write
-lint_tool: oxlint   # via pnpm exec oxlint
-max_open_prs: 15
 ```
+## Summary
+[What broke, why, what this fixes]
+
+lobster-biscuit
+
+Fixes #ISSUE
+
+## Root Cause
+[file:line — one sentence]
+
+## Behavior Changes
+| Scenario | Before | After |
+|---|---|---|
+| [case] | [broken] | [fixed] |
+
+## Tests
+- Format: oxfmt ✓
+- Lint: oxlint ✓
+
+## Sign-Off
+- **Models used**: Claude Sonnet 4 (via pi coding agent)
+- **Submitter effort**: [how you found root cause]
+- **Agent notes**: AI-assisted.
+```
+
+## Merge Strategy
+
+- **LIFO**: maintainers review most recently updated PRs. Rebase before merge windows: `./scripts/rebase.sh BRANCH`
+- **Author batching**: Takhoffman batch-merged 6 PRs in 36 min. Get one noticed → cascade.
+- **Merge windows**: Takhoffman ~00:30-02:15 UTC. steipete ~14:00-23:00 UTC.
+- **Stale timer**: 5 days → stale label. 3 more → auto-close.
+
+## Mistakes We Made
+
+- `console.log()` in CLI → use `process.stdout.write()` (bypasses captured handlers)
+- `groupPolicy ?? "open"` skipping `channels.defaults` → use full fallback chain
+- Fixed 3 of 4 code paths → search module for ALL instances
+- PR without `lobster-biscuit` → ignored by maintainers
+- `npm run build` → use `pnpm lint` + `pnpm exec oxfmt`
