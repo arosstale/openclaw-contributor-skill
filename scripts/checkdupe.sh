@@ -6,19 +6,9 @@ repo=openclaw/openclaw
 
 echo "Checking #$issue for existing PRs..."
 
-# Timeline API (most reliable — catches Fixes #N links)
-prs=$(gh api "repos/$repo/issues/$issue/timeline" --paginate 2>/dev/null | \
-  python3 -c "
-import json,sys
-sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-raw = sys.stdin.read().replace('][', ',')
-data = json.loads(raw) if raw.strip() else []
-for i in data:
-    if i.get('event') == 'cross-referenced':
-        s = i.get('source', {}).get('issue', {})
-        if s.get('pull_request') and s.get('state') == 'open':
-            print(f'#{s[\"number\"]} @{s.get(\"user\",{}).get(\"login\",\"?\")}')
-" 2>/dev/null || true)
+# Timeline API — catches "Fixes #N" cross-references
+prs=$(gh api "repos/$repo/issues/$issue/timeline" --paginate \
+  --jq '[.[] | select(.event == "cross-referenced") | .source.issue | select(.pull_request != null and .state == "open") | "#\(.number) @\(.user.login)"] | .[]' 2>/dev/null || true)
 
 if [ -n "$prs" ]; then
     echo "DUPLICATE(S) FOUND:"
