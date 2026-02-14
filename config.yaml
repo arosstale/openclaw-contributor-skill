@@ -3,6 +3,32 @@
 target_repo: openclaw/openclaw
 fork_repo: arosstale/openclaw
 fork_remote: fork
+work_dir: /tmp/openclaw-fork
 
-# The only rule that matters
+# Tooling
+format_tool: oxfmt     # pnpm exec oxfmt --write <files>
+format_version: "0.32.0"
+lint_tool: oxlint       # pnpm exec oxlint <files>
+full_lint: pnpm lint
+
+# Limits
+max_open_prs: 15
 check_duplicates_first: true
+
+# Merge windows (UTC)
+merge_windows:
+  takhoffman: "00:30-02:15"
+  steipete: "14:00-23:00"
+
+# Stale timer
+stale_days: 5
+auto_close_days: 3  # after stale label
+
+# PR requirements
+required_codeword: lobster-biscuit
+required_sections:
+  - Summary
+  - Root Cause
+  - Behavior Changes
+  - Tests
+  - Sign-Off

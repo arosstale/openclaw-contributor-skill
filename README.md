@@ -2,49 +2,38 @@
 
 A Pi skill for contributing to [OpenClaw](https://github.com/openclaw/openclaw) responsibly.
 
+## Track Record
+
+- **9 PRs merged** (including 6 batch-merged by Takhoffman in 36 min)
+- **38 PRs closed** (duplicates, broken code, or noise — self-audited)
+- **8 PRs open** (all CI green, all compliant)
+
 ## What This Skill Does
 
 Guides you through fixing ONE issue at a time:
 
-1. **Check for duplicates** - Search existing PRs before writing any code
-2. **Analyze the issue** - Find the root cause, not just the symptom
-3. **Implement the fix** - Minimal change, verify it compiles and tests pass
-4. **Submit the PR** - Short description, honest about what it does
-5. **Respond to feedback** - Fix Greptile/maintainer comments or close the PR
+1. **Triage** — Is this issue worth fixing? (`commands/triage.md`)
+2. **Check duplicates** — Anyone already working on this? (`commands/checkdupe.md`)
+3. **Analyze** — Find root cause + all pattern instances (`commands/analyze.md`)
+4. **Fix** — Minimal change, format, lint (`commands/fix.md`)
+5. **Submit** — PR with required template (`commands/submit.md`)
+6. **Audit** — Post-session health check on all PRs (`commands/audit.md`)
+7. **Rebase** — Keep PRs fresh for LIFO queue (`commands/rebase.md`)
+8. **Close** — Honest cleanup of broken PRs (`commands/close.md`)
 
-## Why It Exists
+## Key Strategy
 
-We created ~40 PRs across several sessions. Then we audited them honestly:
-
-- **38 were closed** - duplicates, broken code, or noise
-- **5 of 10 recent PRs** duplicated work by other contributors
-- **Greptile flagged real bugs** in almost every PR (wrong formats, broken templates, non-exported imports)
-- **2 survived** - the ones where we actually understood the code
-
-This skill encodes the lessons from that experience.
+- **LIFO**: Maintainers review most recently updated PRs first
+- **Author Batching**: Once noticed, maintainers batch-merge your PRs
+- **Quality > Volume**: Silent merges (no review comments) = highest trust
+- **Stabilisation Mode**: Bug fixes only — no features, no refactors
 
 ## Hard Rules
 
-1. **Check for existing PRs FIRST** - before any code
-2. **ONE PR at a time** - finish before starting next
-3. **`npm run build` MUST pass** - no exceptions
-4. **Read every review comment** - fix or close
-5. **Close your own broken PRs** - do not leave trash in the queue
-
-## Files
-
-```
-SKILL.md                    - Skill definition and complete workflow
-AGENTS.md                   - Rules for AI agents using this skill
-commands/
-  checkduplicates.md        - How to check for existing PRs (MOST IMPORTANT)
-  analyzeissue.md           - How to analyze an issue
-  createfix.md              - How to implement and verify a fix
-  submitpr.md               - How to submit a PR
-  closebadpr.md             - How to close your own broken PRs
-config.yaml                 - Repository configuration
-```
-
-## Context
-
-See [OpenClaw discussion #11907](https://github.com/openclaw/openclaw/discussions/11907#discussioncomment-15736421) for why PR hygiene matters.
+1. Check for existing PRs FIRST — before any code
+2. ONE PR at a time — finish before starting next
+3. `pnpm lint` MUST pass
+4. Every PR needs `lobster-biscuit`, `Fixes #NNNN`, and Sign-Off
+5. Respond to ALL Greptile comments — expand fix if pattern found
+6. Close broken PRs immediately
+7. Never exceed 15 open PRs
